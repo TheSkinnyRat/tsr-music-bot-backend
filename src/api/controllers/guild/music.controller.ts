@@ -4,8 +4,10 @@ import type Lavamusic from '@/structures/Lavamusic';
 import type { GuildRequest } from '@/api/middlewares/guild.middleware';
 import { EmbedBuilder } from 'discord.js';
 import { z } from 'zod';
-import type { SearchResult, Track, UnresolvedSearchResult } from 'lavalink-client';
+import type { LavalinkNodeOptions, SearchResult, Track, UnresolvedSearchResult } from 'lavalink-client';
+import type { LavalinkNode } from 'lavalink-client';
 import { mapTrack, mapTracks } from '@/utils/track';
+import { testConnection, waitForPlayerConnection } from '@/utils/lavalink';
 
 class MusicController {
 	private client: Lavamusic;
@@ -14,14 +16,37 @@ class MusicController {
 		this.client = client;
 	}
 
-	public playerCreate = async (req: GuildRequest, res: Response): Promise<void> => {
-		const schema = z.object({
-			voiceChannel: z.string().min(1, 'Voice channel ID must not be empty'),
-			textChannel: z.string().min(1, 'Text channel ID must not be empty')
+	public search = async (req: GuildRequest, res: Response): Promise<void> => {
+		const searchSchema = z.object({
+			query: z.string().min(1, 'Query must not be empty'),
+			source: z.enum(['youtube', 'ytsearch', 'youtube music', 'ytmsearch', 'soundcloud']).optional(),
 		});
 
 		try {
-			const { voiceChannel, textChannel } = schema.parse(req.body || {});
+			const { query, source } = searchSchema.parse(req.query);
+			const player = this.client.manager.getPlayer(req.guild!.id);
+			const result = player ? await player.search({ query, source }, null, false) : await this.client.manager.search(query, null, source);
+			const mappedResult = mapTracks(result.tracks as Track[]);
+			response.success(res, { search: { tracks: mappedResult } });
+
+		} catch (error) {
+			if (error instanceof z.ZodError) {
+				response.error(res, 400, zod.formatZodError(error));
+			} else {
+				response.error(res, 500, `An unexpected error occurred: ${error}`);
+			}
+		}
+	};
+
+	public playerCreate = async (req: GuildRequest, res: Response): Promise<void> => {
+		const schema = z.object({
+			voiceChannel: z.string().min(1, 'Voice channel ID must not be empty'),
+			textChannel: z.string().min(1, 'Text channel ID must not be empty'),
+			nodeId: z.string().optional()
+		});
+
+		try {
+			const { voiceChannel, textChannel, nodeId } = schema.parse(req.body || {});
 			const { guild, user } = req;
 
 			const player = this.client.manager.getPlayer(guild!.id);
@@ -52,16 +77,57 @@ class MusicController {
 				return;
 			}
 
+			let customNode: LavalinkNode | undefined;
+			if (nodeId) {
+				const officialLavalink = await this.client.dbNew.getOfficialLavalink(nodeId);
+				const guildLavalink = await this.client.dbNew.getGuildLavalink(guild!.id, nodeId);
+				const lavalink = officialLavalink || guildLavalink;
+				if (!lavalink) {
+					response.error(res, 404, `Lavalink node ${nodeId} not found`);
+					return;
+				}
+
+				const customNodeOptions: LavalinkNodeOptions = {
+					id: `${guild!.id}-${nodeId}`,
+					host: lavalink.NodeHost,
+					port: lavalink.NodePort,
+					authorization: lavalink.NodeAuthorization,
+					secure: lavalink.NodeSecure,
+					retryAmount: lavalink.NodeRetryAmount,
+					retryDelay: lavalink.NodeRetryDelay
+				};
+
+				const result = await testConnection(customNodeOptions, this.client.manager.nodeManager);
+				if (result.status_code === 'failed') {
+					response.error(res, 503, `Failed to connect to ${lavalink.NodeName}: ${result.reason}`);
+					return;
+				}
+
+				customNode = result.node;
+			}
+
 			const newPlayer = this.client.manager.createPlayer({
 				guildId: guild!.id,
 				voiceChannelId: voiceChannel,
 				textChannelId: textChannel,
 				selfMute: false,
 				selfDeaf: true,
-				vcRegion: voiceChannelObj.rtcRegion!
+				vcRegion: voiceChannelObj.rtcRegion!,
+				node: customNode
 			});
 
 			await newPlayer.connect();
+
+			const connected = await waitForPlayerConnection(newPlayer);
+			if (!connected) {
+				const message = new EmbedBuilder()
+					.setDescription('Disconnecting because cannot verify player connection')
+					.setColor(this.client.color.main);
+				await textChannelObj.send({ embeds: [message] });
+				await newPlayer.destroy();
+				response.error(res, 500, 'Cannot verify player connection');
+				return;
+			}
 
 			const message = new EmbedBuilder()
 				.setDescription(`${user?.username ? `[${user.username}]` : `[[Web Player](${process.env.APP_CLIENT_URL}/guild/${guild!.id}/room)]`} Joined <#${voiceChannel}> and bound to <#${textChannel}>`)
@@ -219,8 +285,8 @@ class MusicController {
 
 			if (req.query.identifier) {
 				const uri = `https://music.youtube.com/watch?v=${req.query.identifier}&list=RD${req.query.identifier}`;
-				const search = await this.client.manager.search(uri, undefined);
-				const mappedResult = mapTracks(search.tracks);
+				const search = player ? await player.search({ query: uri }, null, false) : await this.client.manager.search(uri, undefined);
+				const mappedResult = mapTracks(search.tracks as Track[]);
 
 				response.success(res, { search: { tracks: mappedResult } });
 				return;
@@ -233,8 +299,8 @@ class MusicController {
 			}
 
 			const uri = `https://youtube.com/watch?v=${identifier}&list=RD${identifier}`;
-			const search = await this.client.manager.search(uri, undefined);
-			const mappedResult = mapTracks(search.tracks);
+			const search = player ? await player.search({ query: uri }, null, false) : await this.client.manager.search(uri, undefined);
+			const mappedResult = mapTracks(search.tracks as Track[]);
 
 			response.success(res, { search: { tracks: mappedResult } });
 		} catch (error) {
