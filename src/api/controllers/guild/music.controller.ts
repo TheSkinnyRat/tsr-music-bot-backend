@@ -104,6 +104,12 @@ class MusicController {
 				}
 
 				customNode = result.node;
+				if (customNode) {
+					const message = new EmbedBuilder()
+						.setDescription(`${user?.username ? `[${user.username}]` : `[[Web Player](${this.client.env.WEB_PLAYER_URL}/guild/${guild!.id}/room)]`} Using lavalink server: ${lavalink.NodeName}`)
+						.setColor(this.client.color.main);
+					await textChannelObj.send({ embeds: [message] });
+				}
 			}
 
 			const newPlayer = this.client.manager.createPlayer({
@@ -130,7 +136,7 @@ class MusicController {
 			}
 
 			const message = new EmbedBuilder()
-				.setDescription(`${user?.username ? `[${user.username}]` : `[[Web Player](${process.env.APP_CLIENT_URL}/guild/${guild!.id}/room)]`} Joined <#${voiceChannel}> and bound to <#${textChannel}>`)
+				.setDescription(`${user?.username ? `[${user.username}]` : `[[Web Player](${this.client.env.WEB_PLAYER_URL}/guild/${guild!.id}/room)]`} Joined <#${voiceChannel}> and bound to <#${textChannel}>`)
 				.setColor(this.client.color.main);
 			await textChannelObj.send({ embeds: [message] });
 
@@ -153,7 +159,7 @@ class MusicController {
 			await player!.destroy();
 
 			const message = new EmbedBuilder()
-				.setDescription(`${user?.username ? `[${user.username}]` : `[[Web Player](${process.env.APP_CLIENT_URL}/guild/${guild!.id}/room)]`} Disconnected`)
+				.setDescription(`${user?.username ? `[${user.username}]` : `[[Web Player](${this.client.env.WEB_PLAYER_URL}/guild/${guild!.id}/room)]`} Disconnected`)
 				.setColor(this.client.color.main);
 			await channel!.send({ embeds: [message] });
 
@@ -172,7 +178,7 @@ class MusicController {
 			await player!.connect();
 
 			const message = new EmbedBuilder()
-				.setDescription(`${user?.username ? `[${user.username}]` : `[[Web Player](${process.env.APP_CLIENT_URL}/guild/${guild!.id}/room)]`} Reconnected`)
+				.setDescription(`${user?.username ? `[${user.username}]` : `[[Web Player](${this.client.env.WEB_PLAYER_URL}/guild/${guild!.id}/room)]`} Reconnected`)
 				.setColor(this.client.color.main);
 			await channel!.send({ embeds: [message] });
 
@@ -222,7 +228,7 @@ class MusicController {
 			});
 
 			const message = new EmbedBuilder()
-				.setDescription(`${user?.username ? `[${user.username}]` : `[[Web Player](${process.env.APP_CLIENT_URL}/guild/${guild!.id}/room)]`} Added [${track.info.title}](${track.info.uri})`)
+				.setDescription(`${user?.username ? `[${user.username}]` : `[[Web Player](${this.client.env.WEB_PLAYER_URL}/guild/${guild!.id}/room)]`} Added [${track.info.title}](${track.info.uri})`)
 				.setColor(this.client.color.main);
 
 			if (!player!.get('silentMode')) {
@@ -264,7 +270,7 @@ class MusicController {
 			});
 
 			const message = new EmbedBuilder()
-				.setDescription(`${user?.username ? `[${user.username}]` : `[[Web Player](${process.env.APP_CLIENT_URL}/guild/${guild!.id}/room)]`} Removed [${track.info.title}](${track.info.uri})`)
+				.setDescription(`${user?.username ? `[${user.username}]` : `[[Web Player](${this.client.env.WEB_PLAYER_URL}/guild/${guild!.id}/room)]`} Removed [${track.info.title}](${track.info.uri})`)
 				.setColor(this.client.color.main);
 
 			if (!player!.get('silentMode')) {
@@ -337,7 +343,7 @@ class MusicController {
 			});
 
 			const message = new EmbedBuilder()
-				.setDescription(`${user?.username ? `[${user.username}]` : `[[Web Player](${process.env.APP_CLIENT_URL}/guild/${guild!.id}/room)]`} Seeked to ${this.client.utils.formatTime(position)}`)
+				.setDescription(`${user?.username ? `[${user.username}]` : `[[Web Player](${this.client.env.WEB_PLAYER_URL}/guild/${guild!.id}/room)]`} Seeked to ${this.client.utils.formatTime(position)}`)
 				.setColor(this.client.color.main);
 
 			if (!player!.get('silentMode')) {
@@ -379,7 +385,7 @@ class MusicController {
 			});
 
 			const message = new EmbedBuilder()
-				.setDescription(`${user?.username ? `[${user.username}]` : `[[Web Player](${process.env.APP_CLIENT_URL}/guild/${guild!.id}/room)]`} Paused the player`)
+				.setDescription(`${user?.username ? `[${user.username}]` : `[[Web Player](${this.client.env.WEB_PLAYER_URL}/guild/${guild!.id}/room)]`} Paused the player`)
 				.setColor(this.client.color.main);
 
 			if (!player!.get('silentMode')) {
@@ -417,7 +423,7 @@ class MusicController {
 			});
 
 			const message = new EmbedBuilder()
-				.setDescription(`${user?.username ? `[${user.username}]` : `[[Web Player](${process.env.APP_CLIENT_URL}/guild/${guild!.id}/room)]`} Resumed the player`)
+				.setDescription(`${user?.username ? `[${user.username}]` : `[[Web Player](${this.client.env.WEB_PLAYER_URL}/guild/${guild!.id}/room)]`} Resumed the player`)
 				.setColor(this.client.color.main);
 
 			if (!player!.get('silentMode')) {
@@ -458,7 +464,7 @@ class MusicController {
 			});
 
 			const message = new EmbedBuilder()
-				.setDescription(`${user?.username ? `[${user.username}]` : `[[Web Player](${process.env.APP_CLIENT_URL}/guild/${guild!.id}/room)]`} Skipped to next track`)
+				.setDescription(`${user?.username ? `[${user.username}]` : `[[Web Player](${this.client.env.WEB_PLAYER_URL}/guild/${guild!.id}/room)]`} Skipped to next track`)
 				.setColor(this.client.color.main);
 
 			if (!player!.get('silentMode')) {
@@ -492,7 +498,7 @@ class MusicController {
 			});
 
 			const message = new EmbedBuilder()
-				.setDescription(`${user?.username ? `[${user.username}]` : `[[Web Player](${process.env.APP_CLIENT_URL}/guild/${guild!.id}/room)]`} Rewound the track`)
+				.setDescription(`${user?.username ? `[${user.username}]` : `[[Web Player](${this.client.env.WEB_PLAYER_URL}/guild/${guild!.id}/room)]`} Rewound the track`)
 				.setColor(this.client.color.main);
 
 			if (!player!.get('silentMode')) {
@@ -530,7 +536,7 @@ class MusicController {
 			});
 
 			const message = new EmbedBuilder()
-				.setDescription(`${user?.username ? `[${user.username}]` : `[[Web Player](${process.env.APP_CLIENT_URL}/guild/${guild!.id}/room)]`} Enabled track loop`)
+				.setDescription(`${user?.username ? `[${user.username}]` : `[[Web Player](${this.client.env.WEB_PLAYER_URL}/guild/${guild!.id}/room)]`} Enabled track loop`)
 				.setColor(this.client.color.main);
 
 			if (!player!.get('silentMode')) {
@@ -568,7 +574,7 @@ class MusicController {
 			});
 
 			const message = new EmbedBuilder()
-				.setDescription(`${user?.username ? `[${user.username}]` : `[[Web Player](${process.env.APP_CLIENT_URL}/guild/${guild!.id}/room)]`} Disabled track loop`)
+				.setDescription(`${user?.username ? `[${user.username}]` : `[[Web Player](${this.client.env.WEB_PLAYER_URL}/guild/${guild!.id}/room)]`} Disabled track loop`)
 				.setColor(this.client.color.main);
 
 			if (!player!.get('silentMode')) {
@@ -604,7 +610,7 @@ class MusicController {
 			});
 
 			const message = new EmbedBuilder()
-				.setDescription(`${user?.username ? `[${user.username}]` : `[[Web Player](${process.env.APP_CLIENT_URL}/guild/${guild!.id}/room)]`} Shuffled the queue`)
+				.setDescription(`${user?.username ? `[${user.username}]` : `[[Web Player](${this.client.env.WEB_PLAYER_URL}/guild/${guild!.id}/room)]`} Shuffled the queue`)
 				.setColor(this.client.color.main);
 
 			if (!player!.get('silentMode')) {

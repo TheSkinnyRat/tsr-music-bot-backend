@@ -164,7 +164,7 @@ class PlaylistController {
 			}
 
 			const loadMessage = new EmbedBuilder()
-				.setDescription(`${user?.username ? `[${user.username}]` : `[[Web Player](${process.env.APP_CLIENT_URL}/guild/${guild!.id}/room)]`} Adding playlist ${playlist.PlaylistName} to queue...`)
+				.setDescription(`${user?.username ? `[${user.username}]` : `[[Web Player](${this.client.env.WEB_PLAYER_URL}/guild/${guild!.id}/room)]`} Adding playlist ${playlist.PlaylistName} to queue...`)
 				.setColor(this.client.color.main);
 
 			const messageSend = await channel!.send({ embeds: [loadMessage] });
@@ -185,7 +185,7 @@ class PlaylistController {
 			});
 
 			const message = new EmbedBuilder()
-				.setDescription(`${user?.username ? `[${user.username}]` : `[[Web Player](${process.env.APP_CLIENT_URL}/guild/${guild!.id}/room)]`} Loaded playlist ${playlist.PlaylistName}`)
+				.setDescription(`${user?.username ? `[${user.username}]` : `[[Web Player](${this.client.env.WEB_PLAYER_URL}/guild/${guild!.id}/room)]`} Loaded playlist ${playlist.PlaylistName}`)
 				.setColor(this.client.color.main);
 
 			await messageSend.edit({ embeds: [message] });

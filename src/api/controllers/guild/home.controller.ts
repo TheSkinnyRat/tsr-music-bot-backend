@@ -79,7 +79,7 @@ class HomeController {
 			});
 			const message = new EmbedBuilder()
 				.setColor(this.client.config.color.main)
-				.setDescription(`${user?.username ? `[${user.username}]` : `[[Web Player](${process.env.APP_CLIENT_URL}/guild/${guild?.id}/room)]`} ${authMode ? 'Enabled' : 'Disabled'} authentication mode`);
+				.setDescription(`${user?.username ? `[${user.username}]` : `[[Web Player](${this.client.env.WEB_PLAYER_URL}/guild/${guild?.id}/room)]`} ${authMode ? 'Enabled' : 'Disabled'} authentication mode`);
 			await channel?.send({ embeds: [message] });
 
 			response.success(res, {
@@ -115,7 +115,7 @@ class HomeController {
 
 			const message = new EmbedBuilder()
 				.setColor(this.client.config.color.main)
-				.setDescription(`${user?.username ? `[${user.username}]` : `[[Web Player](${process.env.APP_CLIENT_URL}/guild/${guild?.id}/room)]`} ${silentMode ? 'Enabled' : 'Disabled'} silent mode`);
+				.setDescription(`${user?.username ? `[${user.username}]` : `[[Web Player](${this.client.env.WEB_PLAYER_URL}/guild/${guild?.id}/room)]`} ${silentMode ? 'Enabled' : 'Disabled'} silent mode`);
 			await channel?.send({ embeds: [message] });
 
 			response.success(res, {
