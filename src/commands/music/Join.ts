@@ -63,6 +63,7 @@ export default class Join extends Command {
 			selfMute: false,
 			selfDeaf: true,
 			vcRegion: memberVoiceChannel.rtcRegion!,
+			volume: 70,
 		});
 		if (!player.connected) await player.connect();
 		return await ctx.sendMessage({
