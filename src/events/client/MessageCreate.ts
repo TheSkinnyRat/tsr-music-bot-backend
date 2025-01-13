@@ -60,7 +60,7 @@ export default class MessageCreate extends Event {
 		if (!cmd) return;
 		const command = this.client.commands.get(cmd) || this.client.commands.get(this.client.aliases.get(cmd) as string);
 		if (!command) return;
-		const allowedCommands = ['play', 'join', 'ping', 'help', 'webplayer'];
+		const allowedCommands = ['play', 'join', 'leave', 'ping', 'help', 'webplayer'];
 		if (!(allowedCommands.includes(cmd) || command.permissions?.dev)) return;
 
 		const ctx = new Context(message, args);

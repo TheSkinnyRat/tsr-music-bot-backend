@@ -119,6 +119,7 @@ class MusicController {
 				selfMute: false,
 				selfDeaf: true,
 				vcRegion: voiceChannelObj.rtcRegion!,
+				volume: 70,
 				node: customNode
 			});
 
